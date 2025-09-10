@@ -1,40 +1,45 @@
-@app.route('/debug', methods=['POST'])
-def debug():
-    print("DEBUG ROUTE HIT")
-    data = request.get_json()
-    print(f"Received data: {data}")
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import json
+import os
+from datetime import datetime
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/', methods=['GET'])
+def health():
     return jsonify({
-        'received_data': data,
-        'headers': dict(request.headers),
-        'method': request.method
+        'status': 'healthy',
+        'service': 'Slither API',
+        'version': '1.0.0',
+        'timestamp': datetime.now().isoformat()
     })
+
 @app.route('/analyze', methods=['POST'])
 def analyze_contract():
     try:
-        # Add detailed logging
-        print(f"Request method: {request.method}")
-        print(f"Request headers: {dict(request.headers)}")
-        print(f"Request data: {request.get_data()}")
-        
-        data = request.json
-        print(f"Parsed JSON: {data}")
+        data = request.get_json()
         
         if not data:
-            print("No JSON data received")
-            return jsonify({'error': 'No JSON data received'}), 400
+            return jsonify({'error': 'No JSON data'}), 400
             
-        contract_code = data.get('contract')
-        contract_name = data.get('name', 'Unknown')
-        
-        print(f"Contract code length: {len(contract_code) if contract_code else 0}")
-        
+        contract_code = data.get('contract', '')
         if not contract_code:
-            print("Contract code is missing or empty")
-            return jsonify({'error': 'Contract code required'}), 400
-        
-        # Rest of your existing code...
+            return jsonify({'error': 'Missing contract field'}), 400
+            
+        # For now, return success without Slither
+        return jsonify({
+            'success': True,
+            'message': 'Contract received successfully',
+            'contract_length': len(contract_code),
+            'timestamp': datetime.now().isoformat()
+        })
         
     except Exception as e:
-        print(f"Exception occurred: {str(e)}")
-        print(f"Exception type: {type(e).__name__}")
-        return jsonify({'error': f'Server error: {str(e)}'}), 500
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    # Let Railway handle the port
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
