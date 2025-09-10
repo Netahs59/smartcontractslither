@@ -1,3 +1,13 @@
+@app.route('/debug', methods=['POST'])
+def debug():
+    print("DEBUG ROUTE HIT")
+    data = request.get_json()
+    print(f"Received data: {data}")
+    return jsonify({
+        'received_data': data,
+        'headers': dict(request.headers),
+        'method': request.method
+    })
 @app.route('/analyze', methods=['POST'])
 def analyze_contract():
     try:
