@@ -11,7 +11,6 @@ RUN apt-get update && apt-get install -y \
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
-# Set working directory
 WORKDIR /app
 
 # Copy requirements and install Python dependencies
@@ -21,8 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Expose port
-EXPOSE 8080
+# Test Slither installation
+RUN slither --version || echo "Slither installation check failed"
 
-# Run the application
+EXPOSE 8080
 CMD ["python", "app.py"]
